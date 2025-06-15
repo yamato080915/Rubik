@@ -1,6 +1,11 @@
 import numpy as np
+import sys, random
+args = sys.argv[1:]
+
 faceColors = ["W","Y","G","B","R","O"]
 faceNames = ["U", "D", "F", "B", "L", "R"]
+movetype = ["", "'", "2"]
+
 def print_color(d, c=None):
     colors = {
         "W": "\033[47m", 
@@ -114,11 +119,32 @@ def move(cube:np.ndarray=reset(), string:str=None):
     now = cube
     if string:
         for i in string.split():
-            if "'" in i:
+            if "2" in i:
+                now = mov(mov(now, i.replace("2", "")), i.replace("2", ""))
+            elif "'" in i:
                 now = mov(now, i.replace("'", ""), True)
             else:
                 now = mov(now, i)
     return now
 
-if __name__=="__main__":
-    viewprint(move(string="U D R F' B L'"))
+def scramble(length:int=18):
+    direction = 0
+    adjust = 0
+    temp = 0
+    moves = []
+    for i in range(length):
+        while direction==temp and adjust==0:
+            temp = random.randint(0,5)
+            adjust = int(adjust==(temp+1)//2)*((temp+1)//2)
+        direction = temp
+        type = random.randint(0,2)
+        moves.append(f"{faceNames[temp]}{movetype[type]}")
+    return moves
+
+
+
+if "--scramble" in args:
+    moves = " ".join(scramble())
+    print(moves)
+    viewprint(move(string=moves))
+    exit()
