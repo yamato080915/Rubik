@@ -1,30 +1,34 @@
 import numpy as np
 from main import *
 
+MAXDEPTH = 5
+
 def is_solved(cube:np.ndarray=reset()):
-    return np.array_equal(cube, reset())
+	return np.array_equal(cube, reset())
 
-def solve_func(cube:np.ndarray, depth=0, hand:list=[], history:set=set()):
-    #print(depth)
-    if depth==3:
-        return
-    for i in range(18):
-        moved = cube.copy()
-        moved = mov(moved, faceNames[i//3], i%3==1)
-        if i%3==2:moved = mov(moved, faceNames[i//3])
-        if is_solved(moved):
-            print(" ".join(hand+[f"{faceNames[i//3]}{movetype[i%3]}"]))
-        else:
-            byte = moved.tobytes()
-            if not byte in history:
-                history.add(byte)
-                solve_func(moved, depth+1, hand+[f"{faceNames[i//3]}{movetype[i%3]}"], history)
+def solve_dfs(cube:np.ndarray, depth=0, moves=[]):
+	if depth==0:
+		global history
+		history = {cube.tobytes(): 0}
+	elif depth==MAXDEPTH:
+		return
+	for i in range(18):
+		if depth==0 or moves[-1][0]!=i//3:
+			moved = cube.copy()
+			mov(moved, faceNames[i//3], i%3==1)
+			if i%3==2:
+				mov(moved, faceNames[i//3])
+			moves_ = moves + [[i//3, i%3]]
+			byte = moved.tobytes()
+			if byte in history and history[byte]<=depth+1:
+				continue
+			history[byte] = depth+1
+			if is_solved(moved):
+				print(" ".join([f"{faceNames[x[0]]}{movetype[x[1]]}" for x in moves_]))
+			else:
+				solve_dfs(moved, depth+1, moves_)
 
-def solve(cube:np.ndarray):
-    solve_func(cube)
-
-string = " ".join(scramble(2))
-print(string)
-#viewprint(move(string=string))
+string = " ".join(scramble(5))
+print("scramble =", string)
 cube = move(string=string)
-solve(cube)
+solve_dfs(cube)
