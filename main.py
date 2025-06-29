@@ -35,7 +35,8 @@ def viewerFace(face:list, center):
     return d
 
 def viewprint(data:np.ndarray):
-    view = viewer(data)
+    d = data.copy()
+    view = viewer(d)
     for i in view:
         print_color(i,i)
 
